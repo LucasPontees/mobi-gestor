@@ -1,8 +1,8 @@
 export interface User {
   id: string;
-  nome: string;
+  username: string;
   email: string;
-  tipo: string;
+  role: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 

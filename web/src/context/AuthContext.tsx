@@ -19,22 +19,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Usuários mockados para demonstração
-const DEFAULT_USERS = [
-  {
-    id: '1',
-    username: 'admin',
-    password: 'admin123',
-    isAdmin: true
-  },
-  {
-    id: '2',
-    username: 'user',
-    password: 'user123',
-    isAdmin: false
-  }
-];
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -61,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const loadedUsers = await auth.getUsers();
       setUsers(loadedUsers.map(user => ({
         ...user,
-        isAdmin: user.role === 'ADMIN'
+        role: user.role
       })));
     } catch (error) {
       console.error('Error loading users:', error);
@@ -73,13 +57,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      const response = await auth.login({ username, password });
+      const response = await auth.login({ username: username, password: password });
       
       const userData = {
         id: response.user.id,
         username: response.user.username,
         email: response.user.email,
-        isAdmin: response.user.role === 'ADMIN',
+        role: response.user.role,
         status: response.user.status
       };
 
@@ -93,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('user', JSON.stringify(userData));
       
       // Redirecionar com base no tipo de usuário
-      if (userData.isAdmin) {
+      if (userData.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/dashboard');
@@ -136,7 +120,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: response.user.email,
         password: password, // Keep password for local auth
         isAdmin: response.user.role === 'ADMIN',
-        status: response.user.status
+        status: response.user.status,
+        role: response.user.role
       };
       
       setUsers(prev => [...prev, newUser]);

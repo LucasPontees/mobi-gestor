@@ -194,8 +194,8 @@ export function UserManagement() {
           {users.map((user: User) => (
             <TableRow key={user.id}>
               <TableCell className="font-medium">{user.id}</TableCell>
-              <TableCell>{user.nome}</TableCell>
-              <TableCell>{user.tipo === "ADMIN" ? "Administrador" : "Usuário"}</TableCell>
+              <TableCell>{user.username}</TableCell>
+              <TableCell>{user.role === "ADMIN" ? "Administrador" : "Usuário"}</TableCell>
               <TableCell>
                 <span className={user.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}>
                   {user.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}

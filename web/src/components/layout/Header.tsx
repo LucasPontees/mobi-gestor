@@ -20,7 +20,7 @@ export function Header() {
                   Dashboard
                 </Button>
               </Link>
-              {user.isAdmin && (
+              {user.role === 'ADMIN' && (
                 <Link to="/admin">
                   <Button variant="ghost" size="sm">
                     Admin
@@ -34,7 +34,7 @@ export function Header() {
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground">
               Bem-vindo, <span className="font-medium text-foreground">{user.username}</span>
-              {user.isAdmin && <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">Admin</span>}
+              {user.role === 'ADMIN' && <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full">Admin</span>}
             </span>
             <Button variant="outline" onClick={logout} size="sm">
               Sair
