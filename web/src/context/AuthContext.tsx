@@ -47,8 +47,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedUser = localStorage.getItem('user');
     
     if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-      loadUsers(); // Carrega usuários se houver um token
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      if (userData.isAdmin) {
+        loadUsers(); // Carrega usuários apenas se for admin
+      }
     }
     setIsLoading(false);
   }, []);
