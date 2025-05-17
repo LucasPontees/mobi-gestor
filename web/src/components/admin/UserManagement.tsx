@@ -33,6 +33,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { User } from '@/types';
+import { toast } from "sonner";
 
 const formSchema = z.object({
   username: z.string().min(3, { message: "Username deve ter pelo menos 3 caracteres" }),
@@ -42,7 +43,7 @@ const formSchema = z.object({
 });
 
 export function UserManagement() {
-  const { users, addUser, removeUser } = useAuth();
+  const { users, addUser, removeUser, deactivateUser, activateUser, loadUsers } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -65,9 +66,27 @@ export function UserManagement() {
     }
   }
 
-  function handleRemoveUser(userId: string) {
+  async function handleRemoveUser(userId: string) {
     if (confirm("Tem certeza que deseja remover este usuário?")) {
-      removeUser(userId);
+      await removeUser(userId);
+      loadUsers();
+    }
+  }
+
+  async function handleToggleStatus(user: User) {
+    if (user.id === 'admin-default') {
+      toast.error('Não é possível alterar o status do usuário admin principal');
+      return;
+    }
+
+    const action = user.status === 'ACTIVE' ? 'desativar' : 'ativar';
+    if (confirm(`Tem certeza que deseja ${action} este usuário?`)) {
+      if (user.status === 'ACTIVE') {
+        await deactivateUser(user.id);
+      } else {
+        await activateUser(user.id);
+      }
+      loadUsers();
     }
   }
 
@@ -167,6 +186,7 @@ export function UserManagement() {
             <TableHead>ID</TableHead>
             <TableHead>Usuário</TableHead>
             <TableHead>Tipo</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead className="text-right">Ações</TableHead>
           </TableRow>
         </TableHeader>
@@ -176,12 +196,25 @@ export function UserManagement() {
               <TableCell className="font-medium">{user.id}</TableCell>
               <TableCell>{user.username}</TableCell>
               <TableCell>{user.isAdmin ? "Administrador" : "Usuário"}</TableCell>
-              <TableCell className="text-right">
+              <TableCell>
+                <span className={user.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}>
+                  {user.status === 'ACTIVE' ? 'Ativo' : 'Inativo'}
+                </span>
+              </TableCell>
+              <TableCell className="text-right space-x-2">
+                <Button 
+                  variant={user.status === 'ACTIVE' ? "destructive" : "default"}
+                  size="sm"
+                  onClick={() => handleToggleStatus(user)}
+                  disabled={user.id === 'admin-default'}
+                >
+                  {user.status === 'ACTIVE' ? 'Desativar' : 'Ativar'}
+                </Button>
                 <Button 
                   variant="destructive" 
                   size="sm"
                   onClick={() => handleRemoveUser(user.id)}
-                  disabled={user.id === '1'} // Desabilita para o admin principal
+                  disabled={user.id === 'admin-default'}
                 >
                   Remover
                 </Button>

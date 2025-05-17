@@ -1,8 +1,9 @@
-
 export interface User {
   id: string;
   username: string;
+  email: string;
   isAdmin: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export type BetResult = 'green' | 'red' | 'pending';

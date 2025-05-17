@@ -27,6 +27,7 @@ export interface LoginResponse {
     username: string;
     email: string;
     role: string;
+    status: 'ACTIVE' | 'INACTIVE';
   };
 }
 
@@ -43,7 +44,16 @@ export interface RegisterResponse {
     username: string;
     email: string;
     role: string;
+    status: 'ACTIVE' | 'INACTIVE';
   };
+}
+
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export const auth = {
@@ -51,4 +61,10 @@ export const auth = {
     api.post('auth/login', { json: data }).json<LoginResponse>(),
   register: (data: RegisterData) => 
     api.post('auth/register', { json: data }).json<RegisterResponse>(),
+  deactivateUser: (userId: string) =>
+    api.patch(`users/${userId}/deactivate`).json(),
+  activateUser: (userId: string) =>
+    api.patch(`users/${userId}/activate`).json(),
+  getUsers: () => 
+    api.get('users').json<User[]>(),
 };

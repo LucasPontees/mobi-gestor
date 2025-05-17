@@ -26,6 +26,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    if (user.status === 'INACTIVE') {
+      throw new UnauthorizedException('INACTIVE_USER');
+    }
+
     return {
       access_token: await this.jwtService.signAsync({
         sub: user.id,
@@ -37,6 +41,7 @@ export class AuthService {
         username: user.username,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
     };
   }
@@ -62,6 +67,7 @@ export class AuthService {
         username: dto.username,
         email: dto.email,
         password: hashedPassword,
+        status: 'ACTIVE',
         bankroll: {
           create: {
             initialAmount: 0,
@@ -82,7 +88,15 @@ export class AuthService {
         username: user.username,
         email: user.email,
         role: user.role,
+        status: user.status,
       },
     };
+  }
+
+  async updateUserStatus(userId: string, status: 'ACTIVE' | 'INACTIVE') {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { status },
+    });
   }
 } 

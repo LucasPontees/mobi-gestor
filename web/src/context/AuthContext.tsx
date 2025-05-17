@@ -12,6 +12,9 @@ interface AuthContextType {
   isLoading: boolean;
   addUser: (username: string, email: string, password: string, isAdmin: boolean) => Promise<void>;
   removeUser: (userId: string) => void;
+  deactivateUser: (userId: string) => Promise<void>;
+  activateUser: (userId: string) => Promise<void>;
+  loadUsers: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,7 +37,7 @@ const DEFAULT_USERS = [
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [users, setUsers] = useState<(User & { password: string })[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -45,9 +48,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     if (token && storedUser) {
       setUser(JSON.parse(storedUser));
+      loadUsers(); // Carrega usuários se houver um token
     }
     setIsLoading(false);
   }, []);
+
+  const loadUsers = async () => {
+    try {
+      const loadedUsers = await auth.getUsers();
+      setUsers(loadedUsers.map(user => ({
+        ...user,
+        isAdmin: user.role === 'ADMIN'
+      })));
+    } catch (error) {
+      console.error('Error loading users:', error);
+      toast.error('Erro ao carregar lista de usuários');
+    }
+  };
 
   const login = async (username: string, password: string) => {
     setIsLoading(true);
@@ -58,8 +75,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const userData = {
         id: response.user.id,
         username: response.user.username,
-        isAdmin: response.user.role === 'ADMIN'
+        email: response.user.email,
+        isAdmin: response.user.role === 'ADMIN',
+        status: response.user.status
       };
+
+      if (response.user.status === 'INACTIVE') {
+        toast.error('Sua conta está inativa. Por favor, entre em contato para renovar seu contrato.');
+        throw new Error('INACTIVE_USER');
+      }
 
       setUser(userData);
       localStorage.setItem('token', response.access_token);
@@ -73,8 +97,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       toast.success('Login realizado com sucesso!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
+      if (error.message === 'INACTIVE_USER') {
+        // Já exibimos a mensagem específica acima
+        return;
+      }
       toast.error('Usuário ou senha inválidos!');
       throw error;
     } finally {
@@ -102,8 +130,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const newUser = {
         id: response.user.id,
         username: response.user.username,
+        email: response.user.email,
         password: password, // Keep password for local auth
-        isAdmin: response.user.role === 'ADMIN'
+        isAdmin: response.user.role === 'ADMIN',
+        status: response.user.status
       };
       
       setUsers(prev => [...prev, newUser]);
@@ -127,15 +157,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success('Usuário removido com sucesso!');
   };
 
+  const deactivateUser = async (userId: string) => {
+    try {
+      await auth.deactivateUser(userId);
+      setUsers(prev => prev.map(user => 
+        user.id === userId 
+          ? { ...user, status: 'INACTIVE' }
+          : user
+      ));
+      toast.success('Usuário desativado com sucesso!');
+    } catch (error) {
+      console.error('Error deactivating user:', error);
+      toast.error('Erro ao desativar usuário');
+    }
+  };
+
+  const activateUser = async (userId: string) => {
+    try {
+      await auth.activateUser(userId);
+      setUsers(prev => prev.map(user => 
+        user.id === userId 
+          ? { ...user, status: 'ACTIVE' }
+          : user
+      ));
+      toast.success('Usuário ativado com sucesso!');
+    } catch (error) {
+      console.error('Error activating user:', error);
+      toast.error('Erro ao ativar usuário');
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
-      users: users.map(({password, ...user}) => user), 
+      users,
       login, 
       logout, 
       isLoading,
       addUser,
-      removeUser
+      removeUser,
+      deactivateUser,
+      activateUser,
+      loadUsers
     }}>
       {children}
     </AuthContext.Provider>
