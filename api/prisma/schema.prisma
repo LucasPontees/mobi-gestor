@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bankroll  Bankroll?
+  bets      Bet[]
+}
+
+model Bankroll {
+  id              String   @id @default(uuid())
+  initialAmount   Float
+  currentAmount   Float
+  dailyRiskPerc   Float    @default(1) // Default 1%
+  returnMultiplier Float    @default(2) // Default 2x
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model Bet {
+  id          String    @id @default(uuid())
+  description String
+  amount      Float
+  odds        Float
+  status      BetStatus @default(PENDING)
+  result      BetResult?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BetStatus {
+  PENDING
+  SETTLED
+}
+
+enum BetResult {
+  WIN  // Green
+  LOSS // Red
+} 
