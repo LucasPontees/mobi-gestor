@@ -15,6 +15,21 @@ export const api = ky.create({
   }
 });
 
+export interface LoginData {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  user: {
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+  };
+}
+
 export interface RegisterData {
   username: string;
   email: string;
@@ -32,6 +47,8 @@ export interface RegisterResponse {
 }
 
 export const auth = {
+  login: (data: LoginData) =>
+    api.post('auth/login', { json: data }).json<LoginResponse>(),
   register: (data: RegisterData) => 
     api.post('auth/register', { json: data }).json<RegisterResponse>(),
 };

@@ -39,54 +39,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Verificar se há usuários salvos no localStorage
-    const storedUsers = localStorage.getItem('users');
-    if (storedUsers) {
-      setUsers(JSON.parse(storedUsers));
-    } else {
-      setUsers(DEFAULT_USERS);
-      localStorage.setItem('users', JSON.stringify(DEFAULT_USERS));
-    }
-
-    // Verificar se há um usuário salvo no localStorage
+    // Verificar se há um token e usuário salvos no localStorage
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    
+    if (token && storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setIsLoading(false);
   }, []);
 
   const login = async (username: string, password: string) => {
-    // Simulando uma chamada de API
     setIsLoading(true);
     
     try {
-      // Simular delay de rede
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await auth.login({ username, password });
       
-      const foundUser = users.find(
-        u => u.username === username && u.password === password
-      );
+      const userData = {
+        id: response.user.id,
+        username: response.user.username,
+        isAdmin: response.user.role === 'ADMIN'
+      };
+
+      setUser(userData);
+      localStorage.setItem('token', response.access_token);
+      localStorage.setItem('user', JSON.stringify(userData));
       
-      if (foundUser) {
-        const { password: _, ...userWithoutPassword } = foundUser;
-        setUser(userWithoutPassword);
-        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-        
-        // Redirecionar com base no tipo de usuário
-        if (userWithoutPassword.isAdmin) {
-          navigate('/admin');
-        } else {
-          navigate('/dashboard');
-        }
-        
-        toast.success('Login realizado com sucesso!');
+      // Redirecionar com base no tipo de usuário
+      if (userData.isAdmin) {
+        navigate('/admin');
       } else {
-        toast.error('Usuário ou senha inválidos!');
+        navigate('/dashboard');
       }
+      
+      toast.success('Login realizado com sucesso!');
     } catch (error) {
-      toast.error('Erro ao tentar fazer login');
       console.error('Login error:', error);
+      toast.error('Usuário ou senha inválidos!');
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/');
     toast.info('Você foi desconectado');
