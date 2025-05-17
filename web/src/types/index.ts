@@ -16,11 +16,12 @@ export interface Bet {
   betType: string;
   suggestedAmount: number;
   actualAmount?: number;
+  odds: number;
   result: BetResult;
   profit?: number;
   bankBeforeBet: number;
-  bankAfterBet: number;
-  userId: string; // Adicionando userId para saber qual usuário fez a aposta
+  bankAfterBet?: number;
+  userId: string;
 }
 
 export interface BankSettings {

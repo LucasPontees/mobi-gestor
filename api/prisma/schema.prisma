@@ -44,6 +44,8 @@ model Bet {
   odds        Float
   status      BetStatus @default(PENDING)
   result      BetResult?
+  bankBeforeBet Float
+  bankAfterBet  Float?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 

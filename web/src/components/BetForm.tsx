@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
   const [team2, setTeam2] = useState("");
   const [betType, setBetType] = useState("");
   const [amount, setAmount] = useState(suggestedAmount.toString());
+  const [odds, setOdds] = useState("2.00");
   const [result, setResult] = useState<"green" | "red" | "pending">("pending");
   const [profit, setProfit] = useState("");
 
@@ -30,6 +30,7 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
     setTeam2("");
     setBetType("");
     setAmount(suggestedAmount.toString());
+    setOdds("2.00");
     setResult("pending");
     setProfit("");
   };
@@ -38,7 +39,7 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
     e.preventDefault();
     
     // Validar campos
-    if (!team1 || !team2 || !betType || !amount) {
+    if (!team1 || !team2 || !betType || !amount || !odds) {
       toast.error("Preencha todos os campos obrigatórios");
       return;
     }
@@ -49,8 +50,19 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
     }
 
     const actualAmount = parseFloat(amount);
+    const actualOdds = parseFloat(odds);
     let actualProfit = 0;
     let bankAfter = currentBank;
+
+    if (isNaN(actualAmount) || isNaN(actualOdds)) {
+      toast.error("Valores inválidos");
+      return;
+    }
+
+    if (actualOdds < 1) {
+      toast.error("Odds deve ser maior que 1");
+      return;
+    }
 
     // Calcular o lucro/perda baseado no resultado
     if (result === "green" && profit) {
@@ -70,11 +82,12 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
       betType,
       suggestedAmount,
       actualAmount,
+      odds: actualOdds,
       result,
       profit: result === "green" ? actualProfit : result === "red" ? -actualAmount : undefined,
       bankBeforeBet: currentBank,
       bankAfterBet: bankAfter,
-      userId: user.id // Adicionando userId aqui
+      userId: user.id
     };
 
     onAddBet(newBet);
@@ -120,7 +133,7 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="amount">Valor da Aposta</Label>
               <Input
@@ -133,6 +146,20 @@ export function BetForm({ suggestedAmount, currentBank, onAddBet }: BetFormProps
                 placeholder={suggestedAmount.toString()}
               />
               <p className="text-xs text-muted-foreground">Valor sugerido: R$ {suggestedAmount.toFixed(2)}</p>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="odds">Odds</Label>
+              <Input
+                id="odds"
+                type="number"
+                min="1"
+                step="0.01"
+                value={odds}
+                onChange={(e) => setOdds(e.target.value)}
+                placeholder="Ex: 1.85"
+              />
+              <p className="text-xs text-muted-foreground">Mínimo: 1.00</p>
             </div>
 
             <div className="grid gap-2">
