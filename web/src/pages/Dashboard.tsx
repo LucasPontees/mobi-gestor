@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { BetForm } from "@/components/BetForm";
 import { BetHistory } from "@/components/BetHistory";
@@ -18,28 +17,6 @@ const Dashboard = () => {
     dailyPercentageRisk: 1,
     expectedReturnMultiplier: 2
   });
-
-  // Carregar configurações e apostas do localStorage
-  useEffect(() => {
-    const savedSettings = localStorage.getItem("bankSettings");
-    if (savedSettings) {
-      setBankSettings(JSON.parse(savedSettings));
-    }
-
-    const savedBets = localStorage.getItem("bets");
-    if (savedBets) {
-      setBets(JSON.parse(savedBets));
-    }
-  }, []);
-
-  // Salvar configurações e apostas no localStorage quando mudar
-  useEffect(() => {
-    localStorage.setItem("bankSettings", JSON.stringify(bankSettings));
-  }, [bankSettings]);
-
-  useEffect(() => {
-    localStorage.setItem("bets", JSON.stringify(bets));
-  }, [bets]);
 
   // Cálculos da banca
   const {

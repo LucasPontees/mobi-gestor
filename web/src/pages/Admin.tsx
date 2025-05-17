@@ -1,28 +1,16 @@
-
-import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Header } from "@/components/layout/Header";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { StatsOverview } from "@/components/admin/StatsOverview";
 import { AdminRoute } from "@/components/AdminRoute";
 import { useAuth } from "@/context/AuthContext";
-import { Bet } from "@/types";
 import { useAdminStats } from "@/hooks/useAdminStats";
 
 const Admin = () => {
   const { users } = useAuth();
-  const [bets, setBets] = useState<Bet[]>([]);
-
-  // Carregar apostas do localStorage
-  useEffect(() => {
-    const savedBets = localStorage.getItem("bets");
-    if (savedBets) {
-      setBets(JSON.parse(savedBets));
-    }
-  }, []);
 
   // Calcular estatísticas administrativas
-  const stats = useAdminStats({ bets, users });
+  const stats = useAdminStats({ bets: [], users });
 
   return (
     <AdminRoute>
