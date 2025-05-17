@@ -7,7 +7,7 @@ export function Header() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="border-b border-border bg-card text-card-foreground">
+    <header className="bg-primary-dark">
       <div className="container flex items-center justify-between h-16">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold">

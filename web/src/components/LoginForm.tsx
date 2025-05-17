@@ -17,17 +17,17 @@ export function LoginForm() {
   };
 
   return (
-    <Card className="w-[350px]">
+    <Card className="w-[350px] bg-primary-dark">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">Login</CardTitle>
-        <CardDescription>
+        <CardTitle className="text-2xl font-bold text-text-primary">Login</CardTitle>
+        <CardDescription className="text-text-primary">
           Entre com suas credenciais para acessar o sistema
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="username">Usuário</Label>
+            <Label htmlFor="username" className="text-text-primary">Usuário</Label>
             <Input
               id="username"
               type="text"
@@ -38,7 +38,7 @@ export function LoginForm() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Senha</Label>
+            <Label htmlFor="password" className="text-text-primary">Senha</Label>
             <Input
               id="password"
               type="password"
