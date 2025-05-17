@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '@/types';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { auth } from '@/http/api';
 
 interface AuthContextType {
   user: User | null;
@@ -10,7 +10,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
-  addUser: (username: string, password: string, isAdmin: boolean) => void;
+  addUser: (username: string, email: string, password: string, isAdmin: boolean) => Promise<void>;
   removeUser: (userId: string) => void;
 }
 
@@ -99,18 +99,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.info('Você foi desconectado');
   };
 
-  const addUser = (username: string, password: string, isAdmin: boolean) => {
-    const newUser = {
-      id: crypto.randomUUID(),
-      username,
-      password,
-      isAdmin
-    };
-    
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    toast.success(`Usuário ${username} adicionado com sucesso!`);
+  const addUser = async (username: string, email: string, password: string, isAdmin: boolean) => {
+    try {
+      const response = await auth.register({
+        username,
+        email,
+        password
+      });
+      
+      // Add the new user to the local state with password for local auth
+      const newUser = {
+        id: response.user.id,
+        username: response.user.username,
+        password: password, // Keep password for local auth
+        isAdmin: response.user.role === 'ADMIN'
+      };
+      
+      setUsers(prev => [...prev, newUser]);
+      toast.success(`Usuário ${username} registrado com sucesso!`);
+    } catch (error) {
+      console.error('Error registering user:', error);
+      toast.error('Erro ao registrar usuário. Por favor, tente novamente.');
+      throw error; // Re-throw to handle in the component
+    }
   };
 
   const removeUser = (userId: string) => {

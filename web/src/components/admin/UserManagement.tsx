@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from "@/components/ui/button";
@@ -37,6 +36,7 @@ import { User } from '@/types';
 
 const formSchema = z.object({
   username: z.string().min(3, { message: "Username deve ter pelo menos 3 caracteres" }),
+  email: z.string().email({ message: "Email inválido" }),
   password: z.string().min(6, { message: "Senha deve ter pelo menos 6 caracteres" }),
   isAdmin: z.boolean().default(false)
 });
@@ -49,15 +49,20 @@ export function UserManagement() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       username: "",
+      email: "",
       password: "",
       isAdmin: false
     }
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    addUser(values.username, values.password, values.isAdmin);
-    form.reset();
-    setIsOpen(false);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await addUser(values.username, values.email, values.password, values.isAdmin);
+      form.reset();
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error in form submission:', error);
+    }
   }
 
   function handleRemoveUser(userId: string) {
@@ -92,6 +97,19 @@ export function UserManagement() {
                         <FormLabel>Nome de usuário</FormLabel>
                         <FormControl>
                           <Input placeholder="usuario123" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="usuario@exemplo.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
