@@ -66,6 +66,7 @@ export default {
 				},
 				text: {
 					primary: '#0F172A',
+
 				},
         betting: {
           green: '#4CAF50',
