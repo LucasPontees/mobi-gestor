@@ -1,8 +1,8 @@
 export interface User {
   id: string;
-  username: string;
+  nome: string;
   email: string;
-  isAdmin: boolean;
+  tipo: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 

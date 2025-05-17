@@ -22,15 +22,10 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2">Bet Manager</h1>
+        <h1 className="text-4xl font-bold mb-2">Cash Alto</h1>
         <p className="text-muted-foreground">Sistema de gerenciamento de apostas esportivas</p>
       </div>
       <LoginForm />
-      
-      <div className="mt-8 text-center text-sm text-muted-foreground">
-        <p>Use as credenciais demo:</p>
-        <p className="font-medium">Usuário: admin | Senha: admin123</p>
-      </div>
     </div>
   );
 };

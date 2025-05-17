@@ -12,66 +12,66 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { username: dto.username },
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { nome: dto.username },
     });
 
-    if (!user) {
+    if (!usuario) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+    const isPasswordValid = await bcrypt.compare(dto.password, usuario.senha);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (user.status === 'INACTIVE') {
+    if (usuario.status === 'INACTIVE') {
       throw new UnauthorizedException('INACTIVE_USER');
     }
 
     return {
       access_token: await this.jwtService.signAsync({
-        sub: user.id,
-        username: user.username,
-        role: user.role,
+        sub: usuario.id,
+        username: usuario.nome,
+        role: usuario.tipo,
       }),
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        status: user.status,
+        id: usuario.id,
+        username: usuario.nome,
+        email: usuario.email,
+        role: usuario.tipo,
+        status: usuario.status,
       },
     };
   }
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.prisma.user.findFirst({
+    const usuarioExistente = await this.prisma.usuario.findFirst({
       where: {
         OR: [
-          { username: dto.username },
+          { nome: dto.username },
           { email: dto.email },
         ],
       },
     });
 
-    if (existingUser) {
+    if (usuarioExistente) {
       throw new UnauthorizedException('Username or email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const senhaHash = await bcrypt.hash(dto.password, 10);
 
-    const user = await this.prisma.user.create({
+    const usuario = await this.prisma.usuario.create({
       data: {
-        username: dto.username,
+        nome: dto.username,
         email: dto.email,
-        password: hashedPassword,
+        senha: senhaHash,
         status: 'ACTIVE',
-        bankroll: {
+        banca: {
           create: {
-            initialAmount: 0,
-            currentAmount: 0,
+            valorInicial: 0,
+            valorAtual: 0,
           },
         },
       },
@@ -79,24 +79,24 @@ export class AuthService {
 
     return {
       access_token: await this.jwtService.signAsync({
-        sub: user.id,
-        username: user.username,
-        role: user.role,
+        sub: usuario.id,
+        username: usuario.nome,
+        role: usuario.tipo,
       }),
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        status: user.status,
+        id: usuario.id,
+        username: usuario.nome,
+        email: usuario.email,
+        role: usuario.tipo,
+        status: usuario.status,
       },
     };
   }
 
   async updateUserStatus(userId: string, status: 'ACTIVE' | 'INACTIVE') {
-    return this.prisma.user.update({
+    return this.prisma.usuario.update({
       where: { id: userId },
       data: { status },
     });
   }
-} 
+}

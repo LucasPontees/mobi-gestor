@@ -10,47 +10,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Usuario {
   id        String   @id @default(uuid())
   email     String   @unique
-  username  String   @unique
-  password  String
-  role      Role     @default(USER)
+  nome      String   @unique @map("username")
+  senha     String   @map("password")
+  tipo      Role     @default(USER) @map("role")
   status    UserStatus @default(ACTIVE)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  criadoEm  DateTime @default(now()) @map("createdAt")
+  atualizadoEm DateTime @updatedAt @map("updatedAt")
 
-  bankroll  Bankroll?
-  bets      Bet[]
+  banca     Banca?
+  apostas   Aposta[]
+
+  @@map("User")
 }
 
-model Bankroll {
+model Banca {
   id              String   @id @default(uuid())
-  initialAmount   Float
-  currentAmount   Float
-  dailyRiskPerc   Float    @default(1) // Default 1%
-  returnMultiplier Float    @default(2) // Default 2x
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  valorInicial    Float    @map("initialAmount")
+  valorAtual      Float    @map("currentAmount")
+  riscoPercDiario Float    @default(1) @map("dailyRiskPerc")
+  multiplicadorRetorno Float @default(2) @map("returnMultiplier")
+  criadoEm        DateTime @default(now()) @map("createdAt")
+  atualizadoEm    DateTime @updatedAt @map("updatedAt")
 
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id])
+  usuarioId       String   @unique @map("userId")
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+
+  @@map("Bankroll")
 }
 
-model Bet {
-  id          String    @id @default(uuid())
-  description String
-  amount      Float
-  odds        Float
-  status      BetStatus @default(PENDING)
-  result      BetResult?
-  bankBeforeBet Float
-  bankAfterBet  Float?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Aposta {
+  id            String    @id @default(uuid())
+  descricao     String    @map("description")
+  valor         Float     @map("amount")
+  odds          Float
+  status        StatusAposta @default(PENDENTE) @map("status")
+  resultado     ResultadoAposta? @map("result")
+  bancaAntes    Float     @map("bankBeforeBet")
+  bancaDepois   Float?    @map("bankAfterBet")
+  criadoEm      DateTime  @default(now()) @map("createdAt")
+  atualizadoEm  DateTime  @updatedAt @map("updatedAt")
 
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
+  usuarioId     String    @map("userId")
+  usuario       Usuario   @relation(fields: [usuarioId], references: [id])
+
+  @@map("Bet")
 }
 
 enum Role {
@@ -63,12 +69,16 @@ enum UserStatus {
   INACTIVE
 }
 
-enum BetStatus {
-  PENDING
-  SETTLED
+enum StatusAposta {
+  PENDENTE @map("PENDING")
+  FINALIZADA @map("SETTLED")
+
+  @@map("BetStatus")
 }
 
-enum BetResult {
-  WIN  // Green
-  LOSS // Red
-} 
+enum ResultadoAposta {
+  GANHOU @map("WIN")
+  PERDEU @map("LOSS")
+
+  @@map("BetResult")
+}

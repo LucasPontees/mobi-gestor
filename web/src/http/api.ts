@@ -50,9 +50,9 @@ export interface RegisterResponse {
 
 export interface User {
   id: string;
-  username: string;
+  nome: string;
   email: string;
-  role: string;
+  tipo: string;
   status: 'ACTIVE' | 'INACTIVE';
 }
 

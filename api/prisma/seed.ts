@@ -5,22 +5,22 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Criar usuário admin
-  const adminUser = await prisma.user.upsert({
+  const adminUser = await prisma.usuario.upsert({
     where: { email: 'admin@example.com' },
     update: {},
     create: {
       email: 'admin@example.com',
-      username: 'admin',
-      password: await bcrypt.hash('admin123', 10),
-      role: 'ADMIN',
+      nome: 'admin',
+      senha: await bcrypt.hash('admin123', 10),
+      tipo: 'ADMIN',
       status: 'ACTIVE',
       // Criar bankroll junto com o usuário
-      bankroll: {
+      banca: {
         create: {
-          initialAmount: 1000,
-          currentAmount: 1000,
-          dailyRiskPerc: 1,
-          returnMultiplier: 2
+          valorInicial: 1000,
+          valorAtual: 1000,
+          riscoPercDiario: 1,
+          multiplicadorRetorno: 2
         }
       }
     }

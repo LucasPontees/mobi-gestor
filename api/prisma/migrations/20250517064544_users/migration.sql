@@ -46,6 +46,8 @@ CREATE TABLE "Bet" (
     "odds" DOUBLE PRECISION NOT NULL,
     "status" "BetStatus" NOT NULL DEFAULT 'PENDING',
     "result" "BetResult",
+    "bankBeforeBet" DOUBLE PRECISION NOT NULL,
+    "bankAfterBet" DOUBLE PRECISION,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "userId" TEXT NOT NULL,

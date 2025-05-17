@@ -16,20 +16,20 @@ export class UsersController {
   @Get()
   @Roles('ADMIN')
   async findAll() {
-    const users = await this.prisma.user.findMany({
+    const usuarios = await this.prisma.usuario.findMany({
       select: {
         id: true,
-        username: true,
+        nome: true,
         email: true,
-        role: true,
+        tipo: true,
         status: true,
-        createdAt: true,
+        criadoEm: true,
       }
     });
 
-    return users.map(user => ({
-      ...user,
-      isAdmin: user.role === 'ADMIN'
+    return usuarios.map(usuario => ({
+      ...usuario,
+      isAdmin: usuario.tipo === 'ADMIN'
     }));
   }
 
@@ -44,4 +44,4 @@ export class UsersController {
   async activateUser(@Param('id') id: string) {
     return this.authService.updateUserStatus(id, 'ACTIVE');
   }
-} 
+}
